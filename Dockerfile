@@ -1,12 +1,15 @@
-FROM alpine:3.12
-# Add Maintainer Info
-LABEL maintainer="Nofar Bluestein <nofarb@gmail.com>"
-# Copy the Go binary into the image. The Go binary must be
-# statically compiled with CGO disabled. Use the following
-# build command:
-#
-#   CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -a -tags netgo
-#
-ADD go-sample-app /bin/
-# Command to run the executable
+# Build stage
+FROM golang:1.21-alpine AS builder
+WORKDIR /app
+COPY go.mod go.sum ./
+RUN go mod download
+COPY . .
+RUN CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -o go-sample-app
+
+# Runtime stage
+FROM alpine:3.19
+LABEL maintainer="Harness Demo <demo@harness.io>"
+WORKDIR /bin
+COPY --from=builder /app/go-sample-app .
+EXPOSE 8080
 ENTRYPOINT ["/bin/go-sample-app"]
