@@ -1,0 +1,3 @@
+name: go-sample-app
+replicas: 2
+image: docker.io/nitinnbisht/nitinnbisht:latest
